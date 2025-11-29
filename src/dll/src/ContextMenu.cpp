@@ -1599,7 +1599,10 @@ namespace Nilesoft
 				hdcPaint = hdc;
 			if(hdcPaint)
 			{
-				if (hdcPaint != hdc && color.a == 255)
+				// Check if we can use the ClearType hack (Opaque Background + Opaque Text)
+				bool is_opaque = (color.a == 255 && _theme.background.effect == 0 && _theme.background.opacity == 255);
+
+				if (hdcPaint != hdc && is_opaque)
 					::BitBlt(hdcPaint, rc->left, rc->top, rc->width(), rc->height(), hdc, rc->left, rc->top, SRCCOPY);
 				else if (hdcPaint != hdc)
 					bp.clear();
@@ -1608,14 +1611,17 @@ namespace Nilesoft
 				//::SetBkMode(hdcPaint, TRANSPARENT);
 				auto hFontOld = ::SelectObject(hdcPaint, hFont);
 				DTTOPTS dttOpts = { sizeof(DTTOPTS), DTT_TEXTCOLOR, color.to_BGR() };
-				if (color.a < 255) {
+				
+				// Use Composited if NOT opaque (Transparent background OR Transparent text)
+				if (!is_opaque) {
 					dttOpts.dwFlags |= DTT_COMPOSITED;
 				}
+
 				//::SetTextAlign(hdcPaint, TA_BASELINE | TA_UPDATECP);
 				::DrawThemeTextEx(_hTheme, hdcPaint, 0, 0, text, length, format, const_cast<Rect *>(rc), &dttOpts);
 				::SelectObject(hdcPaint, hFontOld);
 
-				if (hdcPaint != hdc && color.a == 255)
+				if (hdcPaint != hdc && is_opaque)
 					bp.set_alpha(255);
 			}
 		}

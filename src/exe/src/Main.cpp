@@ -892,6 +892,11 @@ void DrawString(HDC hdc, HFONT hFont, RECT *rc, COLORREF color, const wchar_t *t
 	{
 		if(hdcPaint)
 		{
+			if (opacity == 255)
+				::BitBlt(hdcPaint, rc->left, rc->top, rc->right - rc->left, rc->bottom - rc->top, hdc, rc->left, rc->top, SRCCOPY);
+			else
+				::BufferedPaintClear(hBufferedPaint, rc);
+
 			::SetTextColor(hdcPaint, color);
 			::SetBkMode(hdcPaint, TRANSPARENT);
 
@@ -900,9 +905,12 @@ void DrawString(HDC hdc, HFONT hFont, RECT *rc, COLORREF color, const wchar_t *t
 			if (opacity < 255) {
 				dttOpts.dwFlags |= DTT_COMPOSITED;
 			}
-			::BufferedPaintClear(hBufferedPaint, rc);
+			
 			::DrawThemeTextEx(_hTheme, hdcPaint, 0, 0, text, length, format, rc, &dttOpts);
 			::SelectObject(hdcPaint, hFontOld);
+
+			if (opacity == 255)
+				::BufferedPaintSetAlpha(hBufferedPaint, rc, 255);
 		}
 		::EndBufferedPaint(hBufferedPaint, TRUE);
 	}

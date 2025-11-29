@@ -1599,9 +1599,9 @@ namespace Nilesoft
 				hdcPaint = hdc;
 			if(hdcPaint)
 			{
-				if (color.a == 255)
+				if (hdcPaint != hdc && color.a == 255)
 					::BitBlt(hdcPaint, rc->left, rc->top, rc->width(), rc->height(), hdc, rc->left, rc->top, SRCCOPY);
-				else
+				else if (hdcPaint != hdc)
 					bp.clear();
 
 				//::SetTextColor(hdcPaint, color);
@@ -1615,7 +1615,7 @@ namespace Nilesoft
 				::DrawThemeTextEx(_hTheme, hdcPaint, 0, 0, text, length, format, const_cast<Rect *>(rc), &dttOpts);
 				::SelectObject(hdcPaint, hFontOld);
 
-				if (color.a == 255)
+				if (hdcPaint != hdc && color.a == 255)
 					bp.set_alpha(255);
 			}
 		}

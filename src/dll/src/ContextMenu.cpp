@@ -1932,7 +1932,13 @@ namespace Nilesoft
 					auto tf = d2d2.createTextFormat(_theme.font.lfFaceName, std::abs(_theme.font.lfHeight));
 					if(tf)
 					{
-						d2d2.render->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE::D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+						auto mode = D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
+						if(_theme.font.lfQuality == CLEARTYPE_QUALITY || _theme.font.lfQuality == CLEARTYPE_NATURAL_QUALITY)
+							mode = D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE;
+						else if(_theme.font.lfQuality == NONANTIALIASED_QUALITY)
+							mode = D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
+
+						d2d2.render->SetTextAntialiasMode(mode);
 						tf->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 						tf->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 						tf->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
@@ -3673,7 +3679,7 @@ namespace Nilesoft
 			long font_size = -1;
 
 			struct {
-				Object name, size, weight, italic;
+				Object name, size, weight, italic, quality;
 			}__font;
 
 			// font
@@ -3686,6 +3692,7 @@ namespace Nilesoft
 					obj.get(2, __font.name);
 					obj.get(3, __font.weight);
 					obj.get(4, __font.italic);
+					obj.get(5, __font.quality);
 				}
 				else if(obj.is_number())
 					__font.size = obj.move();
@@ -3700,6 +3707,7 @@ namespace Nilesoft
 
 			_context.eval_number(th->font.weight, __font.weight);
 			_context.eval_number(th->font.italic, __font.italic);
+			_context.eval_number(th->font.quality, __font.quality);
 
 			_theme.font = {};
 
@@ -3768,6 +3776,9 @@ namespace Nilesoft
 
 			if(__font.italic.not_default())
 				_theme.font.lfItalic = __font.italic.to_bool();
+
+			if(__font.quality.not_default())
+				_theme.font.lfQuality = (BYTE)__font.quality.to_number<int>();
 
 			if(font_size >= 6)
 			{

@@ -842,7 +842,8 @@ namespace Nilesoft
 				{ IDENT_SIZE, &st->font.size },
 				{ IDENT_NAME, &st->font.name },
 				{ IDENT_FONT_WEIGHT, &st->font.weight },
-				{ IDENT_FONT_ITALIC, &st->font.italic }
+				{ IDENT_FONT_ITALIC, &st->font.italic },
+				{ IDENT_QUALITY, &st->font.quality }
 			} };
 
 			auto sets = &context.Cache->settings;

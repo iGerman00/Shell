@@ -896,7 +896,10 @@ void DrawString(HDC hdc, HFONT hFont, RECT *rc, COLORREF color, const wchar_t *t
 			::SetBkMode(hdcPaint, TRANSPARENT);
 
 			auto hFontOld = ::SelectObject(hdcPaint, hFont);
-			DTTOPTS dttOpts = { sizeof(DTTOPTS),  DTT_COMPOSITED | DTT_TEXTCOLOR, color };
+			DTTOPTS dttOpts = { sizeof(DTTOPTS), DTT_TEXTCOLOR, color };
+			if (opacity < 255) {
+				dttOpts.dwFlags |= DTT_COMPOSITED;
+			}
 			::BufferedPaintClear(hBufferedPaint, rc);
 			::DrawThemeTextEx(_hTheme, hdcPaint, 0, 0, text, length, format, rc, &dttOpts);
 			::SelectObject(hdcPaint, hFontOld);

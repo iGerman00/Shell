@@ -1603,7 +1603,10 @@ namespace Nilesoft
 				//::SetTextColor(hdcPaint, color);
 				//::SetBkMode(hdcPaint, TRANSPARENT);
 				auto hFontOld = ::SelectObject(hdcPaint, hFont);
-				DTTOPTS dttOpts = { sizeof(DTTOPTS),  DTT_COMPOSITED | DTT_TEXTCOLOR, color.to_BGR() };
+				DTTOPTS dttOpts = { sizeof(DTTOPTS), DTT_TEXTCOLOR, color.to_BGR() };
+				if (color.a < 255) {
+					dttOpts.dwFlags |= DTT_COMPOSITED;
+				}
 				//::SetTextAlign(hdcPaint, TA_BASELINE | TA_UPDATECP);
 				::DrawThemeTextEx(_hTheme, hdcPaint, 0, 0, text, length, format, const_cast<Rect *>(rc), &dttOpts);
 				::SelectObject(hdcPaint, hFontOld);
@@ -1678,6 +1681,9 @@ namespace Nilesoft
 			_tip.hide(!draw_entire);
 
 			D2D d2d2;
+			if(_theme.font.lfQuality == CLEARTYPE_QUALITY || _theme.font.lfQuality == CLEARTYPE_NATURAL_QUALITY)
+				d2d2.setAlphaMode(D2D1_ALPHA_MODE_IGNORE);
+
 			d2d2.init_res();
 			d2d2.begin(di->hDC, *rc);
 
